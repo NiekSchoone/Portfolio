@@ -1,0 +1,28 @@
+body {
+  background-color: black;
+  margin: 0;
+
+  a, button, canvas, input {
+    &:focus {
+      outline: none;
+    }
+  }
+
+}
+
+span, p, h1, h2, h3, h4, input {
+  color: #20C20E;
+  font-family: Inconsolata, monospace;
+  text-shadow: 0 0 5px #20C20E;
+  font-weight: normal;
+}
+
+.page-title {
+  font-size: 3rem;
+  position: absolute;
+  margin:0;
+}
+
+.content-box {
+  border: 1px solid #20C20E;
+}

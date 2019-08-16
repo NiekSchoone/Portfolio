@@ -1,0 +1,110 @@
+.bot-container {
+  border: 1px solid #20C20E;
+  border-bottom: none;
+  background-color: black;
+  position: absolute;
+  bottom: 0;
+  left: 100px;
+  min-height: 300px;
+
+}
+
+.bot-console {
+  padding: 10px 20px;
+
+  span {
+    display: block;
+  }
+}
+
+.bot-nav {
+  border-top: 1px solid #20C20E;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+
+  ul {
+    margin: 0;
+    padding: 10px 20px;
+    list-style: none;
+
+    li {
+      position: relative;
+      z-index: 1;
+
+      &::before {
+        content: "";
+        width: 100%;
+        top: 0px;
+        left: 0px;
+        height: 100%;
+        position: absolute;
+      }
+
+      &:hover {
+        &::before {
+          background-color: #20C20E;
+          opacity: 0.4;
+        }
+      }
+
+      &.selected {
+        &::before {
+          background-color: #20C20E;
+          opacity: 0.6;
+        }
+      }
+    }
+  }
+}
+
+.bot-commandline {
+  border-top: 1px solid #20C20E;
+  height: 100%;
+  
+  input#setter {
+    /* explorer doesn't support [att=val] selector :( */
+    left: -1000px;
+    position: absolute;
+  }
+
+  .cursor {
+    font-size: 12px;
+    background-color: #20C20E;
+    color: #20C20E;
+    position: relative;
+    opacity: 0.8;
+    
+  }
+
+  #terminal {
+    margin: 8px;
+    cursor: text;
+    height: 500px;
+  }
+
+  #writer {
+    font-family: cursor, courier;
+    font-weight: bold;
+  }
+
+  #getter {
+    margin: 5px;
+  }
+}
+.blink {
+  animation: blink-animation 1s steps(5, start) infinite;
+  -webkit-animation: blink-animation 1s steps(5, start) infinite;
+}
+
+@keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
+
+@-webkit-keyframes blink-animation {
+  to {
+    visibility: hidden;
+  }
+}
