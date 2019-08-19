@@ -1,6 +1,6 @@
-import { Flock } from './BackgroundProcesses/Flocking/flocking';
-import { Pathfinding } from './BackgroundProcesses/Pathfinding/pathfinding';
-import { StateMachine } from './BackgroundProcesses/StateMachine/statemachine';
+import { Flock } from './Flocking/flocking';
+import { PathfindingInstance } from './Pathfinding/pathfindingInstance';
+import { StateMachine } from './StateMachine/statemachine';
 
 export class BGCanvas<T> {
 
@@ -18,10 +18,6 @@ export class BGCanvas<T> {
     window.addEventListener('resize', this.resizeCanvas.bind(this));
   }
 
-  public create<T>(type: (new (cv: HTMLCanvasElement) => T)) {
-    return new type(this.canvas);
-  }
-
   private resizeCanvas () {
     this.canvas.width = this.parent.offsetWidth;
     this.canvas.height = this.parent.offsetHeight;
@@ -29,5 +25,5 @@ export class BGCanvas<T> {
 }
 
 let flocking = new BGCanvas('flocking-stage', Flock);
-let pathfinding = new BGCanvas('pathfinding-stage', Pathfinding);
+let pathfinding = new BGCanvas('pathfinding-stage', PathfindingInstance);
 let statemachine = new BGCanvas('statemachine-stage', StateMachine);

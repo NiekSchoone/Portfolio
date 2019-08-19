@@ -1,5 +1,4 @@
 import './sass/style.scss';
-import './js/NiekBot/app.ts';
-//import './js/custom.js';
-import './js/NiekBot/Games/Snake.ts';
-import './js/BGCanvas.ts';
+import './js/BotNavigation/app.ts';
+import './js/Games/Snake.ts';
+import './js/BackgroundProcesses/BGCanvas.ts';

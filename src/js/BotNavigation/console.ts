@@ -1,4 +1,4 @@
-import EventBus from '../events';
+import EventBus from '../Utils/events';
 
 export default class BotConsole {
 

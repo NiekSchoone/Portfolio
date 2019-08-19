@@ -1,4 +1,4 @@
-import vector2, { Vector2 } from './vector2';
+import vector2, { Vector2 } from '../../Utils/vector2';
 
 export default class Boid {
 
@@ -162,8 +162,8 @@ export default class Boid {
     let height = this.canvas.height;
     if (this.position.x < -10) this.position.x = width + 2;
     if (this.position.y < -10) this.position.y = height + 2;
-    if (this.position.x > width + 10) this.position.x = -10;
-    if (this.position.y > height + 10) this.position.y = -10;
+    if (this.position.x > width + 30) this.position.x = -10;
+    if (this.position.y > height + 30) this.position.y = -10;
   }
 
   public draw(ctx: CanvasRenderingContext2D) {

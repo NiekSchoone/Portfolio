@@ -1,5 +1,5 @@
-import Snake from './Games/Snake';
-import EventBus from '../events';
+import Snake from '../Games/Snake';
+import EventBus from '../Utils/events';
 import BotConsole from './console';
 
 export class Bot {
