@@ -19,12 +19,11 @@ export default class PathRequestManager {
   }
 
   public set Pathfinder(p: Pathfinding) {
-    this.pathfinder = p
+    this.pathfinder = p;
   }
 
   public requestPath(start: Vector2, end: Vector2, callback: PathRequestCallback): void {
     let newRequest = new PathRequest(start, end, callback);
-    console.log(newRequest);
     this.pathRequestQueue.push(newRequest);
     this.TryProcessNext();
   }
@@ -36,9 +35,8 @@ export default class PathRequestManager {
   }
 
   private TryProcessNext() {
-    if(!this.isProcessingPath && this.pathRequestQueue.length > 0) {
+    if (!this.isProcessingPath && this.pathRequestQueue.length > 0) {
       this.currentRequest = this.pathRequestQueue.shift();
-      console.log(this.currentRequest);
       this.isProcessingPath = true;
       this.pathfinder.findPath(this.currentRequest.pathStart, this.currentRequest.pathEnd);
     }
@@ -54,11 +52,10 @@ class PathRequest {
   public pathStart: Vector2;
   public pathEnd: Vector2;
   public callback: (path: Vector2[], success: boolean) => void;
-  
+
   public constructor(start: Vector2, end: Vector2, callback: PathRequestCallback) {
     this.pathStart = start;
     this.pathEnd = end;
     this.callback = callback;
   }
 }
-

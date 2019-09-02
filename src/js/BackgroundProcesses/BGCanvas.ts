@@ -1,6 +1,6 @@
 import { Flock } from './Flocking/flocking';
 import { PathfindingInstance } from './Pathfinding/pathfindingInstance';
-import { StateMachine } from './StateMachine/statemachine';
+import { StateMachineInstance } from './StateMachine/statemachineInstance';
 
 export class BGCanvas<T> {
 
@@ -26,4 +26,4 @@ export class BGCanvas<T> {
 
 let flocking = new BGCanvas('flocking-stage', Flock);
 let pathfinding = new BGCanvas('pathfinding-stage', PathfindingInstance);
-let statemachine = new BGCanvas('statemachine-stage', StateMachine);
+let statemachine = new BGCanvas('statemachine-stage', StateMachineInstance);

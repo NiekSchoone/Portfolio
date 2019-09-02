@@ -15,12 +15,14 @@ export class PathfindingInstance {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d');
 
-    this.grid = new Grid();
+    let td = canvas.width / 10;
+    let gh = canvas.height / td;
+    this.grid = new Grid(10, gh, td);
     this.grid.draw(this.ctx);
 
     let pathfinding = new Pathfinding(this.grid);
 
-    this.pathfinder = new Pathfinder(vector2.make(1, 1));
+    this.pathfinder = new Pathfinder(vector2.make(0, 0), this.grid);
     this.pathfinder.draw(this.ctx);
 
     setInterval(this.update.bind(this), 500);

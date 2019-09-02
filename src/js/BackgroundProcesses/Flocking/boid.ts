@@ -30,8 +30,8 @@ export default class Boid {
     this.separationDistance = 30;
     this.cohesionDistance = 110;
 
-    this.velocity.x = Math.random() * (this.maxSpeed - -this.maxSpeed) + -this.maxSpeed;
-    this.velocity.y = Math.random() * (this.maxSpeed - -this.maxSpeed) + -this.maxSpeed;
+    this.velocity.x = (Math.random() * (this.maxSpeed - -this.maxSpeed) + -this.maxSpeed);
+    this.velocity.y = (Math.random() * (this.maxSpeed - -this.maxSpeed) + -this.maxSpeed);
   }
 
   public update(boids: Array<Boid>) {
@@ -57,7 +57,7 @@ export default class Boid {
     let cohese = this.cohesion(boids);
 
     separate = vector2.scale(separate, 3);
-    
+
     this.applyForce(align);
     this.applyForce(separate);
     this.applyForce(cohese);

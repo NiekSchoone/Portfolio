@@ -15,7 +15,7 @@ export class Flock {
 
   private createBoids(amt: number) {
     for (let i = 0; i < amt; i++) {
-      let newBoid = new Boid(this.canvas, 300, 300);
+      let newBoid = new Boid(this.canvas, 200, 300);
       this.boids.push(newBoid);
     }
   }

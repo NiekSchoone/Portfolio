@@ -1,5 +1,4 @@
 import vector2, { Vector2 } from '../../Utils/vector2';
-import Settings from '../../Utils/settings';
 
 export default class Tile {
 
@@ -9,20 +8,15 @@ export default class Tile {
 
   private walkable: boolean;
   private gridPosition: Vector2;
+  private diameter: number;
 
-  constructor(x: number, y: number) {
+  constructor(x: number, y: number, td: number) {
     this.gCost = 0;
     this.hCost = 0;
     this.gridPosition = vector2.make(x, y);
+    this.diameter = td;
 
     this.walkable = true;
-  }
-
-  public compareTo(tile: Tile) {
-    let compare = this.fCost - tile.fCost;
-    if (compare == 0) {
-      compare = this.hCost - tile.hCost;
-    } return -compare;
   }
 
   get GridPosition(): Vector2 { return this.gridPosition; }
@@ -35,7 +29,7 @@ export default class Tile {
   }
 
   get WorldPosition(): Vector2 {
-    return vector2.make(this.gridPosition.x * Settings.tileDiameter, this.gridPosition.y * Settings.tileDiameter);
+    return vector2.make(this.gridPosition.x * this.diameter, this.gridPosition.y * this.diameter);
   }
 
   get fCost() {

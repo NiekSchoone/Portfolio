@@ -4,7 +4,7 @@ import PathRequestManager from './pathRequestManager';
 import { Vector2 } from '../../Utils/vector2';
 
 export default class Pathfinding {
-  
+
   private grid: Grid;
 
   constructor(grid: Grid) {
@@ -12,23 +12,22 @@ export default class Pathfinding {
     PathRequestManager.Instance.Pathfinder = this;
   }
 
-  public findPath(startPosition: Vector2, targetPosition: Vector2): void {
-    let start = this.grid.getTile(startPosition.x, startPosition.y);
-    let end = this.grid.getTile(targetPosition.x, targetPosition.y);
+  public findPath(_startPosition: Vector2, _targetPosition: Vector2): void {
+    let start = this.grid.getTile(_startPosition.x, _startPosition.y);
+    let end = this.grid.getTile(_targetPosition.x, _targetPosition.y);
 
-    let path: Vector2[] = [];
+    let path: Array<Vector2> = new Array<Vector2>();
     let pathFound = false;
 
-    let openSet: Tile[] = [];
-    let closedSet: Tile[] = [];
+    let openSet: Array<Tile> = Array<Tile>();
+    let closedSet: Array<Tile> = Array<Tile>();
 
     openSet.push(start);
-
-    while(openSet.length > 0) {
+    while (openSet.length > 0) {
       let currentTile = openSet[0];
 
       for (let i = 1; i < openSet.length; i++) {
-        if(openSet[i].fCost < currentTile.fCost || openSet[i].fCost == currentTile.fCost && openSet[i].hCost < currentTile.hCost) {
+        if (openSet[i].fCost < currentTile.fCost || openSet[i].fCost == currentTile.fCost && openSet[i].hCost < currentTile.hCost) {
           currentTile = openSet[i];
         }
       }
@@ -62,6 +61,7 @@ export default class Pathfinding {
         }
       }
     }
+
     if (pathFound) {
       path = this.retracePath(start, end);
     }
