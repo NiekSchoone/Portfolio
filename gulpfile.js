@@ -1,8 +1,27 @@
 var gulp = require('gulp');
 var htmlImport = require('gulp-html-import');
 var browserSync = require('browser-sync').create();
+var modifyHTMLlinks = require("gulp-processhtml");  // or try gulp-useref
 
-gulp.task('serve', ['import'], function() {
+
+gulp.task('import', function (done) {
+
+    gulp.src('./src/html/**/*.html')
+    .pipe(modifyHTMLlinks())
+    .pipe(htmlImport('./src/html/components/'))
+    .pipe(gulp.dest('./dist'))
+    .pipe(browserSync.stream());
+
+    // gulp.src(['./src/html/**/*.html', './src/html/components/**/*.html'])
+    //     .pipe(gulp.src('./src/html/components/**/*.html')
+    //     .pipe(htmlImport('./src/html/components/')))
+    //     .pipe(htmlImport('./src/html/components/'))
+    //     .pipe(gulp.dest('./dist'))
+    //     .pipe(browserSync.stream());
+    done();
+});
+
+gulp.task('serve', gulp.series('import', function(done) {
 
     browserSync.init({
         server: {
@@ -10,17 +29,11 @@ gulp.task('serve', ['import'], function() {
         }
     });
 
-    gulp.watch('./src/html/**/*.html',['import']);
-    gulp.watch('./src/html/components/**/*.html',['import']);
-}); 
+    gulp.watch('./src/html/**/*.html', gulp.series('import'));
+    gulp.watch('./src/html/components/**/*.html',gulp.series('import'));
+
+    done();
+})); 
 
 
-gulp.task('import', function () {
-    gulp.src(['./src/html/**/*.html', './src/html/components/**/*.html'])
-        .pipe(gulp.src('./src/html/components/**/*.html').pipe(htmlImport('./src/html/components/')))
-        .pipe(htmlImport('./src/html/components/'))
-        .pipe(gulp.dest('./dist'))
-        .pipe(browserSync.stream());
-})
-
-gulp.task('default', ['serve']);
+gulp.task('default', gulp.series('serve'));

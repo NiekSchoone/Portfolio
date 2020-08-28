@@ -1,7 +1,7 @@
 .game-container {
   display: flex;
   margin: 50px auto 0px;
-  border: 1px solid #20C20E;
+  border: 1px solid $hacker-green;
   width: 320px;
   height: 320px;
   position: relative;
@@ -19,7 +19,7 @@
   z-index: 1;
 
   &:focus {
-    text-shadow: 0 0 5px #20C20E;
+    text-shadow: 0 0 5px $hacker-green;
   }
 }
 

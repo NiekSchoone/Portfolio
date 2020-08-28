@@ -22,7 +22,7 @@ const config = {
     path: path.resolve(__dirname, './dist'),
     filename: 'js/bundle.js'
   },
-  mode: process.env.NODE_ENV,
+  mode: 'production',
   optimization: {
     minimize: false,
     splitChunks: {

@@ -1,5 +1,5 @@
 .bot-container {
-  border: 1px solid #20C20E;
+  border: 1px solid $hacker-green;
   border-bottom: none;
   background-color: black;
   position: absolute;
@@ -18,7 +18,7 @@
 }
 
 .bot-nav {
-  border-top: 1px solid #20C20E;
+  border-top: 1px solid $hacker-green;
   position: absolute;
   width: 100%;
   bottom: 0;
@@ -34,6 +34,7 @@
 
       &::before {
         content: "";
+        pointer-events: none;
         width: 100%;
         top: 0px;
         left: 0px;
@@ -43,14 +44,14 @@
 
       &:hover {
         &::before {
-          background-color: #20C20E;
+          background-color: $hacker-green;
           opacity: 0.4;
         }
       }
 
       &.selected {
         &::before {
-          background-color: #20C20E;
+          background-color: $hacker-green;
           opacity: 0.6;
         }
       }
@@ -59,7 +60,7 @@
 }
 
 .bot-commandline {
-  border-top: 1px solid #20C20E;
+  border-top: 1px solid $hacker-green;
   height: 100%;
   
   input#setter {
@@ -70,8 +71,8 @@
 
   .cursor {
     font-size: 12px;
-    background-color: #20C20E;
-    color: #20C20E;
+    background-color: $hacker-green;
+    color: $hacker-green;
     position: relative;
     opacity: 0.8;
     

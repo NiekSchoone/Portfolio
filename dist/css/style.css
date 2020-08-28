@@ -27,6 +27,7 @@
       z-index: 1; }
       .bot-nav ul li::before {
         content: "";
+        pointer-events: none;
         width: 100%;
         top: 0px;
         left: 0px;
@@ -80,16 +81,24 @@ body {
   body a:focus, body button:focus, body canvas:focus, body input:focus {
     outline: none; }
 
-span, p, h1, h2, h3, h4, input {
+.page-header {
+  border-bottom: 1px solid #20C20E; }
+
+.page-title {
+  font-size: 2rem;
+  margin: 0; }
+
+.page-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%; }
+
+span, p, h1, h2, h3, h4, a, input {
   color: #20C20E;
   font-family: Inconsolata, monospace;
   text-shadow: 0 0 5px #20C20E;
   font-weight: normal; }
-
-.page-title {
-  font-size: 3rem;
-  position: absolute;
-  margin: 0; }
 
 .content-box {
   border: 1px solid #20C20E; }

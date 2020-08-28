@@ -10,19 +10,29 @@ body {
 
 }
 
-span, p, h1, h2, h3, h4, input {
-  color: #20C20E;
-  font-family: Inconsolata, monospace;
-  text-shadow: 0 0 5px #20C20E;
-  font-weight: normal;
+.page-header {
+  border-bottom: 1px solid $hacker-green;
 }
 
 .page-title {
-  font-size: 3rem;
-  position: absolute;
+  font-size: 2rem;
   margin:0;
 }
 
+.page-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+span, p, h1, h2, h3, h4, a, input {
+  color: $hacker-green;
+  font-family: Inconsolata, monospace;
+  text-shadow: 0 0 5px $hacker-green;
+  font-weight: normal;
+}
+
 .content-box {
-  border: 1px solid #20C20E;
+  border: 1px solid $hacker-green;
 }
