@@ -20,21 +20,14 @@
 </section>
 
 
-<section class="container page-content">
-  <div class="row">
-    <div class="col-12">
-      <h1>About</h1>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-4">
-      <figure>
-        <img src="/images/Gorilla.jpeg" alt="">
-      </figure>
-    </div>
-    <div class="col-8">
-      <p>My name is Niek, blablabla</p>
-    </div>
+<section class="page-content">
+  <h1>Games</h1>
+
+  <span id="score-counter"></span>
+  <div class="game-container" id="game-container">
+    <input id="game-btn" class="game-start-btn" type="button" value="Start">
+    <span id="game-msg"></span>
+    <canvas tabindex="1" id="stage" width="320" height="320"></canvas>
   </div>
 </section>
 

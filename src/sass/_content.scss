@@ -7,23 +7,43 @@ body {
       outline: none;
     }
   }
-
 }
 
 .page-header {
   border-bottom: 1px solid $hacker-green;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  background-color: black;
 }
 
 .page-title {
   font-size: 2rem;
-  margin:0;
+  margin: 0px 0px 4px 10px;
 }
 
 .page-content {
-  display: flex;
+  /*display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+  height: 100%;*/
+  margin-top: 45px;
+}
+
+.project-container {
+  position: relative;
+  border: 1px solid $hacker-green;
+  height: 640px;
+  width: 540px;
+}
+
+.project-code {
+  position: absolute;
+  top: 0;
+  background-color: rgba(1, 1, 1, 0.5);
   height: 100%;
+  width: 100%;
 }
 
 span, p, h1, h2, h3, h4, a, input {
@@ -31,6 +51,10 @@ span, p, h1, h2, h3, h4, a, input {
   font-family: Inconsolata, monospace;
   text-shadow: 0 0 5px $hacker-green;
   font-weight: normal;
+
+  &:hover {
+    color: $hacker-green;
+  }
 }
 
 .content-box {

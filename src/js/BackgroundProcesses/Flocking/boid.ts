@@ -34,13 +34,13 @@ export default class Boid {
     this.velocity.y = (Math.random() * (this.maxSpeed - -this.maxSpeed) + -this.maxSpeed);
   }
 
-  public update(boids: Array<Boid>) {
+  public update (boids: Array<Boid>) {
     this.flock(boids);
     this.run();
     this.checkBorder();
   }
 
-  private run() {
+  private run () {
     this.velocity = vector2.add(this.velocity, this.accelaration);
     this.velocity = vector2.clamp(this.velocity, -this.maxSpeed, this.maxSpeed);
 
@@ -51,7 +51,7 @@ export default class Boid {
     this.angle = this.getAngle(this.velocity);
   }
 
-  private flock(boids: Array<Boid>) {
+  private flock (boids: Array<Boid>) {
     let align = this.allignment(boids);
     let separate = this.separation(boids);
     let cohese = this.cohesion(boids);

@@ -107,6 +107,7 @@ export default class Snake {
   }
 
   private changeDirection (e: KeyboardEvent) {
+    console.log('direction change?')
     if (!this.directionChanged) {
       this.directionChanged = true;
       let key = e.keyCode;

@@ -2,9 +2,8 @@
   border: 1px solid $hacker-green;
   border-bottom: none;
   background-color: black;
-  position: absolute;
+  position: fixed;
   bottom: 0;
-  left: 100px;
   min-height: 300px;
   width: 390px;
 }
@@ -31,6 +30,11 @@
     li {
       position: relative;
       z-index: 1;
+
+      a {
+        display: block;
+        position: relative;
+      }
 
       &::before {
         content: "";

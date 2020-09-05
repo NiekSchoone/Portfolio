@@ -14,8 +14,7 @@ export class Bot {
     this.typeWriter();
   }
 
-
-  private typeWriter() {
+  private typeWriter () {
     let elements = [].slice.call(document.getElementsByClassName('typewriter'));
     let txt = 'Welcome!';
     let i = 0;
@@ -35,11 +34,10 @@ export class Bot {
     next();
   }
 
-  private executeCommand(cmd) {
+  private executeCommand (cmd) {
     console.log(cmd);
     let sn = new Snake();
   }
-
 }
 
 let niekbot = new Bot();

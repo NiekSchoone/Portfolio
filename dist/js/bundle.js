@@ -370,6 +370,7 @@ var Snake = /** @class */ (function () {
         this.draw();
     };
     Snake.prototype.changeDirection = function (e) {
+        console.log('direction change?');
         if (!this.directionChanged) {
             this.directionChanged = true;
             var key = e.keyCode;
@@ -629,6 +630,25 @@ var BotConsole = /** @class */ (function () {
     BotConsole.prototype.get = function (elid) {
         return document.getElementById(elid);
     };
+    BotConsole.prototype.writeit = function (from, e) {
+        if (e.keyCode == 13 && from.value.length > 0) {
+            this.emitCommand(this.setter.value);
+            return;
+        }
+        e = e || window.event;
+        var tw = from.value;
+        this.writer.innerHTML = this.nl2br(tw);
+    };
+    BotConsole.prototype.moveit = function (amt, e) {
+        e = e || window.event;
+        var keycode = e.keyCode || e.which;
+        if (keycode === 37 && parseInt(this.cursor.style.left, 10) >= (0 - ((amt - 1) * 10))) {
+            this.cursor.style.left = parseInt(this.cursor.style.left, 10) - 10 + 'px';
+        }
+        else if (keycode === 39 && (parseInt(this.cursor.style.left, 10) + 10) <= 0) {
+            this.cursor.style.left = parseInt(this.cursor.style.left, 10) + 10 + 'px';
+        }
+    };
     BotConsole.prototype.events = function () {
         this.get('bot-commandline').addEventListener('click', function () {
             this.setter.focus();
@@ -652,25 +672,6 @@ var BotConsole = /** @class */ (function () {
     };
     BotConsole.prototype.nl2br = function (str) {
         return str.replace(/\n/g, '<br />');
-    };
-    BotConsole.prototype.writeit = function (from, e) {
-        if (e.keyCode == 13 && from.value.length > 0) {
-            this.emitCommand(this.setter.value);
-            return;
-        }
-        e = e || window.event;
-        var tw = from.value;
-        this.writer.innerHTML = this.nl2br(tw);
-    };
-    BotConsole.prototype.moveit = function (amt, e) {
-        e = e || window.event;
-        var keycode = e.keyCode || e.which;
-        if (keycode === 37 && parseInt(this.cursor.style.left, 10) >= (0 - ((amt - 1) * 10))) {
-            this.cursor.style.left = parseInt(this.cursor.style.left, 10) - 10 + 'px';
-        }
-        else if (keycode === 39 && (parseInt(this.cursor.style.left, 10) + 10) <= 0) {
-            this.cursor.style.left = parseInt(this.cursor.style.left, 10) + 10 + 'px';
-        }
     };
     BotConsole.prototype.emitCommand = function (com) {
         this.setter.value = '';
