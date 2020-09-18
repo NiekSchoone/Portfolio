@@ -20,8 +20,7 @@ export default class Snake {
 
   constructor () {
     this.container = document.getElementById('game-container');
-    this.container.style.display = 'flex';
-    this.canvas = document.getElementById('stage') as HTMLCanvasElement;
+    this.canvas = document.getElementById('game-stage') as HTMLCanvasElement;
     this.ctx = this.canvas.getContext('2d');
 
     this.button = document.getElementById('game-btn') as HTMLInputElement;
@@ -107,7 +106,6 @@ export default class Snake {
   }
 
   private changeDirection (e: KeyboardEvent) {
-    console.log('direction change?')
     if (!this.directionChanged) {
       this.directionChanged = true;
       let key = e.keyCode;

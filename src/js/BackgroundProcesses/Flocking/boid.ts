@@ -84,7 +84,7 @@ export default class Boid {
     return steer;
   }
 
-  private allignment(boids: Array<Boid>): Vector2 {
+  private allignment (boids: Array<Boid>): Vector2 {
     let alignmentVector = vector2.make(0, 0);
     let count = 0;
 

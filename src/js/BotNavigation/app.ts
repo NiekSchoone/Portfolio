@@ -1,6 +1,7 @@
 import Snake from '../Games/Snake';
 import EventBus from '../Utils/events';
 import BotConsole from './console';
+import Tetris from '../Games/tetris';
 
 export class Bot {
 
@@ -36,7 +37,16 @@ export class Bot {
 
   private executeCommand (cmd) {
     console.log(cmd);
-    let sn = new Snake();
+    switch(cmd) {
+      case 'snake':
+        let sn = new Snake();
+        break;
+      case 'tetris':
+        let tt = new Tetris();
+        break;
+      default:
+        break;
+    }
   }
 }
 

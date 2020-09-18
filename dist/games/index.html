@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Niek Schoone Portfolio</title>
+  <title>Niek Schoone</title>
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,900" rel="stylesheet">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
@@ -20,14 +20,21 @@
 </section>
 
 
-<section class="page-content">
-  <h1>Games</h1>
+<section class="container page-content">
+  <div class="row">
+    <div class="col-12">
+      <h1>Games</h1>
+    </div>
+  </div>
 
-  <span id="score-counter"></span>
-  <div class="game-container" id="game-container">
-    <input id="game-btn" class="game-start-btn" type="button" value="Start">
-    <span id="game-msg"></span>
-    <canvas tabindex="1" id="stage" width="320" height="320"></canvas>
+  <div class="row">
+    <div class="col-12 d-flex justify-content-center">
+
+      <span id="score-counter"></span>
+      <div class="game-container" id="game-container">
+        <canvas tabindex="1" id="game-stage"></canvas>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -58,3 +65,8 @@
   <script src="/js/bundle.js"></script>
 </body>
 </html>
+
+
+
+<!--input id="game-btn" class="game-start-btn" type="button" value="Start"-->
+<!--span id="game-msg"></span-->

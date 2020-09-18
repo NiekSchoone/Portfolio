@@ -298,8 +298,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var Snake = /** @class */ (function () {
     function Snake() {
         this.container = document.getElementById('game-container');
-        this.container.style.display = 'flex';
-        this.canvas = document.getElementById('stage');
+        this.canvas = document.getElementById('game-stage');
         this.ctx = this.canvas.getContext('2d');
         this.button = document.getElementById('game-btn');
         this.message = document.getElementById('game-msg');
@@ -370,7 +369,6 @@ var Snake = /** @class */ (function () {
         this.draw();
     };
     Snake.prototype.changeDirection = function (e) {
-        console.log('direction change?');
         if (!this.directionChanged) {
             this.directionChanged = true;
             var key = e.keyCode;
@@ -557,10 +555,10 @@ var PathRequest = /** @class */ (function () {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-__webpack_require__(15);
+__webpack_require__(16);
 __webpack_require__(5);
 __webpack_require__(1);
-__webpack_require__(7);
+__webpack_require__(8);
 
 
 /***/ }),
@@ -573,6 +571,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var Snake_1 = __webpack_require__(1);
 var events_1 = __webpack_require__(2);
 var console_1 = __webpack_require__(6);
+var tetris_1 = __webpack_require__(7);
 var Bot = /** @class */ (function () {
     function Bot() {
         this.botConsole = new console_1.default();
@@ -603,7 +602,16 @@ var Bot = /** @class */ (function () {
     };
     Bot.prototype.executeCommand = function (cmd) {
         console.log(cmd);
-        var sn = new Snake_1.default();
+        switch (cmd) {
+            case 'snake':
+                var sn = new Snake_1.default();
+                break;
+            case 'tetris':
+                var tt = new tetris_1.default();
+                break;
+            default:
+                break;
+        }
     };
     return Bot;
 }());
@@ -690,8 +698,224 @@ exports.default = BotConsole;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var flocking_1 = __webpack_require__(8);
-var pathfindingInstance_1 = __webpack_require__(10);
+var Coordinates = /** @class */ (function () {
+    function Coordinates(_x, _y) {
+        this.x = _x;
+        this.y = _y;
+    }
+    return Coordinates;
+}());
+var Direction;
+(function (Direction) {
+    Direction[Direction["IDLE"] = 0] = "IDLE";
+    Direction[Direction["DOWN"] = 1] = "DOWN";
+    Direction[Direction["LEFT"] = 2] = "LEFT";
+    Direction[Direction["RIGHT"] = 3] = "RIGHT";
+})(Direction || (Direction = {}));
+var Tetronimo;
+(function (Tetronimo) {
+    Tetronimo[Tetronimo["T"] = 0] = "T";
+    Tetronimo[Tetronimo["I"] = 1] = "I";
+    Tetronimo[Tetronimo["SQUARE"] = 2] = "SQUARE";
+    Tetronimo[Tetronimo["J"] = 3] = "J";
+    Tetronimo[Tetronimo["L"] = 4] = "L";
+    Tetronimo[Tetronimo["S"] = 5] = "S";
+    Tetronimo[Tetronimo["Z"] = 6] = "Z";
+})(Tetronimo || (Tetronimo = {}));
+var Tetris = /** @class */ (function () {
+    function Tetris() {
+        this.container = document.getElementById('game-container');
+        this.canvas = document.getElementById('game-stage');
+        this.ctx = this.canvas.getContext('2d');
+        this.gridHeight = 20;
+        this.gridWidth = 12;
+        this.tileDiameter = 20;
+        this.placedTetronimos = new Array();
+        this.canvas.height = this.gridHeight * this.tileDiameter;
+        this.canvas.width = this.gridWidth * this.tileDiameter;
+        this.canvas.addEventListener('keydown', this.handleUserInput.bind(this));
+        this.start();
+    }
+    Tetris.prototype.start = function () {
+        this.score = 0;
+        this.moveDownIterationsLength = 8;
+        this.moveDownIterations = 0;
+        this.currentTetronimoType = Tetronimo.I;
+        this.currentTetronimo = this.getTetronimo(this.currentTetronimoType);
+        this.currentRotationShape = this.getTetronimo(this.currentTetronimoType);
+        this.moveTetronimoX(5);
+        this.canvas.focus();
+        this.interval = setInterval(this.update.bind(this), 100);
+    };
+    Tetris.prototype.end = function () {
+        clearInterval(this.interval);
+    };
+    Tetris.prototype.update = function () {
+        this.moveTetronimo();
+        this.placementCollision();
+        this.horizontalCollision();
+        this.draw();
+    };
+    Tetris.prototype.handleUserInput = function (e) {
+        var key = e.keyCode;
+        switch (key) {
+            case 37: // LEFT KEY
+                this.direction = Direction.LEFT;
+                break;
+            case 39: // RIGHT KEY
+                this.direction = Direction.RIGHT;
+                break;
+            case 40: // DOWN KEY
+                this.direction = Direction.DOWN;
+                break;
+            case 32: // SPACEBAR KEY
+                this.rotateTetronimo();
+                break;
+            default:
+                this.direction = Direction.IDLE;
+                break;
+        }
+    };
+    Tetris.prototype.moveTetronimo = function () {
+        if (this.direction === Direction.RIGHT) {
+            this.moveTetronimoX(1);
+        }
+        else if (this.direction === Direction.LEFT) {
+            this.moveTetronimoX(-1);
+        }
+        this.moveDownIterations++;
+        if (this.direction === Direction.DOWN) {
+            this.moveDownIterations = this.moveDownIterationsLength;
+        }
+        if (this.shouldMoveDown()) {
+            this.moveTetronimoY(1);
+            this.moveDownIterations = 0;
+        }
+        this.direction = Direction.IDLE;
+    };
+    Tetris.prototype.shouldMoveDown = function () {
+        return this.moveDownIterations >= this.moveDownIterationsLength;
+    };
+    Tetris.prototype.moveTetronimoX = function (amount) {
+        for (var i = 0; i < this.currentTetronimo.length; i++) {
+            var tetronimoBlock = this.currentTetronimo[i];
+            tetronimoBlock.x += amount;
+        }
+    };
+    Tetris.prototype.moveTetronimoY = function (amount) {
+        for (var i = 0; i < this.currentTetronimo.length; i++) {
+            var tetronimoBlock = this.currentTetronimo[i];
+            tetronimoBlock.y += amount;
+        }
+    };
+    Tetris.prototype.rotateTetronimo = function () {
+        if (this.currentTetronimoType === Tetronimo.SQUARE) {
+            return;
+        }
+        var rotatedCoords = new Array();
+        for (var i = 0; i < this.currentTetronimo.length; i++) {
+            var current = this.currentRotationShape[i];
+            current.y *= -1;
+            rotatedCoords[i] = new Coordinates(0, 0);
+            rotatedCoords[i].x = Math.round(current.x * Math.cos(Math.PI / 2) - current.y * Math.sin(Math.PI / 2));
+            rotatedCoords[i].y = Math.round(current.x * Math.sin(Math.PI / 2) + current.y * Math.cos(Math.PI / 2));
+            rotatedCoords[i].y *= -1;
+            this.currentTetronimo[i].x = (rotatedCoords[i].x + this.currentTetronimo[0].x);
+            this.currentTetronimo[i].y = (rotatedCoords[i].y + this.currentTetronimo[0].y);
+        }
+        this.currentRotationShape = rotatedCoords;
+    };
+    Tetris.prototype.getTetronimo = function (type) {
+        switch (type) {
+            case Tetronimo.T:
+                return new Array(new Coordinates(0, 0), new Coordinates(-1, 0), new Coordinates(0, -1), new Coordinates(1, 0));
+            case Tetronimo.I:
+                return new Array(new Coordinates(0, 0), new Coordinates(-2, 0), new Coordinates(-1, 0), new Coordinates(1, 0));
+            case Tetronimo.SQUARE:
+                return new Array(new Coordinates(0, 0), new Coordinates(1, 0), new Coordinates(0, 1), new Coordinates(1, 1));
+            case Tetronimo.J:
+                return new Array(new Coordinates(0, 0), new Coordinates(-1, 0), new Coordinates(1, 0), new Coordinates(1, 1));
+            case Tetronimo.L:
+                return new Array(new Coordinates(0, 0), new Coordinates(-1, 0), new Coordinates(1, 0), new Coordinates(1, -1));
+            case Tetronimo.S:
+                return new Array(new Coordinates(0, 0), new Coordinates(1, 0), new Coordinates(0, 1), new Coordinates(-1, 1));
+            case Tetronimo.Z:
+                return new Array(new Coordinates(0, 0), new Coordinates(-1, 0), new Coordinates(0, 1), new Coordinates(1, 1));
+            default:
+                console.warn('tetronimo of type: ' + type + ' not found');
+                break;
+        }
+    };
+    Tetris.prototype.setNewCurrentTetronimo = function (type) {
+        this.currentTetronimoType = type;
+        this.currentTetronimo = this.getTetronimo(this.currentTetronimoType);
+        this.currentRotationShape = this.getTetronimo(this.currentTetronimoType);
+        this.moveTetronimoX(5);
+    };
+    Tetris.prototype.horizontalCollision = function () {
+        for (var i = 0; i < this.currentTetronimo.length; i++) {
+            var currentBlock = this.currentTetronimo[i];
+            if (currentBlock.x >= this.gridWidth) {
+                this.moveTetronimoX(-1);
+            }
+            if (currentBlock.x < 0) {
+                this.moveTetronimoX(1);
+            }
+        }
+    };
+    Tetris.prototype.placementCollision = function () {
+        var placementHappened = false;
+        for (var i = 0; i < this.currentTetronimo.length; i++) {
+            var currentBlock = this.currentTetronimo[i];
+            if (currentBlock.y === this.gridHeight) {
+                placementHappened = true;
+                if (currentBlock.y <= this.gridHeight) {
+                    this.moveTetronimoY(-1);
+                }
+            }
+            if (!placementHappened) {
+                for (var i_1 = 0; i_1 < this.placedTetronimos.length; i_1++) {
+                    var placed = this.placedTetronimos[i_1];
+                    if (currentBlock.y === placed.y && currentBlock.x === placed.x) {
+                        placementHappened = true;
+                        if (currentBlock.y <= placed.y) {
+                            this.moveTetronimoY(-1);
+                        }
+                    }
+                }
+            }
+        }
+        if (placementHappened) {
+            this.placedTetronimos = this.placedTetronimos.concat(this.currentTetronimo);
+            this.setNewCurrentTetronimo(Tetronimo.I);
+        }
+    };
+    Tetris.prototype.draw = function () {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#20C20E';
+        for (var i = 0; i < this.currentTetronimo.length; i++) {
+            var t = this.currentTetronimo[i];
+            this.ctx.fillRect((t.x * this.tileDiameter) + 1, (t.y * this.tileDiameter) + 1, this.tileDiameter - 1, this.tileDiameter - 1);
+        }
+        for (var j = 0; j < this.placedTetronimos.length; j++) {
+            var p = this.placedTetronimos[j];
+            this.ctx.fillRect((p.x * this.tileDiameter) + 1, (p.y * this.tileDiameter) + 1, this.tileDiameter - 1, this.tileDiameter - 1);
+        }
+    };
+    return Tetris;
+}());
+exports.default = Tetris;
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var flocking_1 = __webpack_require__(9);
+var pathfindingInstance_1 = __webpack_require__(11);
 //import { StateMachineInstance } from './StateMachine/statemachineInstance';
 var BGCanvas = /** @class */ (function () {
     function BGCanvas(id, process) {
@@ -714,13 +938,13 @@ var pathfinding = new BGCanvas('pathfinding-stage', pathfindingInstance_1.Pathfi
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var boid_1 = __webpack_require__(9);
+var boid_1 = __webpack_require__(10);
 var Flock = /** @class */ (function () {
     function Flock(canvas) {
         this.canvas = canvas;
@@ -753,7 +977,7 @@ exports.Flock = Flock;
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -903,16 +1127,16 @@ exports.default = Boid;
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var grid_1 = __webpack_require__(11);
-var pathfinder_1 = __webpack_require__(13);
+var grid_1 = __webpack_require__(12);
+var pathfinder_1 = __webpack_require__(14);
 var vector2_1 = __webpack_require__(0);
-var pathfinding_1 = __webpack_require__(14);
+var pathfinding_1 = __webpack_require__(15);
 var PathfindingInstance = /** @class */ (function () {
     function PathfindingInstance(canvas) {
         this.canvas = canvas;
@@ -939,13 +1163,13 @@ exports.PathfindingInstance = PathfindingInstance;
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var tile_1 = __webpack_require__(12);
+var tile_1 = __webpack_require__(13);
 var Grid = /** @class */ (function () {
     function Grid(w, h, td) {
         this.width = w;
@@ -998,7 +1222,7 @@ exports.default = Grid;
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1048,7 +1272,7 @@ exports.default = Tile;
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1114,7 +1338,7 @@ exports.default = Pathfinder;
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1197,7 +1421,7 @@ exports.default = Pathfinding;
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
