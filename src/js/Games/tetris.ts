@@ -1,54 +1,79 @@
-class Coordinates {
+class Block {
   public x: number;
   public y: number;
+  public occupied: boolean;
 
-  constructor(_x: number, _y: number) {
+  constructor (_x: number, _y: number) {
     this.x = _x;
     this.y = _y;
   }
 }
 
-enum Direction {
-  IDLE,
-  DOWN,
-  LEFT,
-  RIGHT
-}
-
-enum Tetronimo {
-  T,
-  I,
-  SQUARE,
-  J,
-  L,
-  S,
-  Z
-}
-
 export default class Tetris {
+
   private container: HTMLElement;
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
 
-  private gridHeight: number;
-  private gridWidth: number;
-  private tileDiameter: number;
+  private Tetrominos: Block[][][] = [
+    [ // I-Piece
+      [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(3, 1)],
+      [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(1, 3)],
+      [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(3, 1)],
+      [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(1, 3)]
+    ],
+    [ // J-Piece
+      [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(2, 0)],
+      [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(2, 2)],
+      [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(0, 2)],
+      [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(0, 0)]
+    ],
+    [ // L-Piece
+      [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(2, 2)],
+      [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(0, 2)],
+      [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(0, 0)],
+      [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(2, 0)]
+    ],
+    [ // O-Piece
+      [new Block(0, 0), new Block(0, 1), new Block(1, 0), new Block(1, 1)],
+      [new Block(0, 0), new Block(0, 1), new Block(1, 0), new Block(1, 1)],
+      [new Block(0, 0), new Block(0, 1), new Block(1, 0), new Block(1, 1)],
+      [new Block(0, 0), new Block(0, 1), new Block(1, 0), new Block(1, 1)]
+    ],
+    [ // S-Piece
+      [new Block(1, 0), new Block(2, 0), new Block(0, 1), new Block(1, 1)],
+      [new Block(0, 0), new Block(0, 1), new Block(1, 1), new Block(1, 2)],
+      [new Block(1, 0), new Block(2, 0), new Block(0, 1), new Block(1, 1)],
+      [new Block(0, 0), new Block(0, 1), new Block(1, 1), new Block(1, 2)]
+    ],
+    [ // T-Piece
+      [new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(2, 1)],
+      [new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(1, 2)],
+      [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(1, 2)],
+      [new Block(1, 0), new Block(1, 1), new Block(2, 1), new Block(1, 2)]
+    ],
+    [ // Z-Piece
+      [new Block(0, 0), new Block(1, 0), new Block(1, 1), new Block(2, 1)],
+      [new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(0, 2)],
+      [new Block(0, 0), new Block(1, 0), new Block(1, 1), new Block(2, 1)],
+      [new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(0, 2)]
+    ]
+  ];
 
-  private direction: Direction;
+  private pieceOrigin: Block;
+  private currentPiece: number;
+  private rotation: number;
+  private nextPieces: Array<number>;
 
   private score: number;
-  private level: number;
 
-  private interval: number;
+  private tileDiameter: number;
+  private gridWidth: number;
+  private gridHeight: number;
+  private grid: Block[][];
 
-  private moveDownIterationsLength: number;
-  private moveDownIterations: number;
-
-  private currentTetronimo: Array<Coordinates>;
-  private currentTetronimoType: Tetronimo;
-  private currentRotationShape: Array<Coordinates>;
-
-  private placedTetronimos: Array<Coordinates>;
+  private drawInterval: number;
+  private dropdownInterval: number;
 
   constructor () {
     this.container = document.getElementById('game-container');
@@ -58,207 +83,176 @@ export default class Tetris {
     this.gridHeight = 20;
     this.gridWidth = 12;
     this.tileDiameter = 20;
-    this.placedTetronimos = new Array<Coordinates>();
 
     this.canvas.height = this.gridHeight * this.tileDiameter;
     this.canvas.width = this.gridWidth * this.tileDiameter;
 
     this.canvas.addEventListener('keydown', this.handleUserInput.bind(this));
+
     this.start();
   }
 
-  private start () {
-    this.score = 0;
-    this.moveDownIterationsLength = 8;
-    this.moveDownIterations = 0;
-
-    this.currentTetronimoType = Tetronimo.I;
-    this.currentTetronimo = this.getTetronimo(this.currentTetronimoType);
-    this.currentRotationShape = this.getTetronimo(this.currentTetronimoType);
-
-    this.moveTetronimoX(5);
-
-    this.canvas.focus();
-    this.interval = setInterval(this.update.bind(this), 100);
-  }
-
-  private end () {
-    clearInterval(this.interval);
-  }
-
-  private update (): void {
-    this.moveTetronimo();
-    this.placementCollision();
-    this.horizontalCollision();
-    this.draw();
-  }
-
-  private handleUserInput (e: KeyboardEvent): void {
-    let key = e.keyCode;
-    switch (key) {
-      case 37: // LEFT KEY
-        this.direction = Direction.LEFT;
-        break;
-      case 39: // RIGHT KEY
-        this.direction = Direction.RIGHT;
-        break;
-      case 40: // DOWN KEY
-        this.direction = Direction.DOWN;
-        break;
-      case 32: // SPACEBAR KEY
-        this.rotateTetronimo();
-        break;
-      default:
-        this.direction = Direction.IDLE;
-        break;
-    }
-  }
-
-  private moveTetronimo () {
-
-    if (this.direction === Direction.RIGHT) {
-      this.moveTetronimoX(1);
-    } else if (this.direction === Direction.LEFT) {
-      this.moveTetronimoX(-1);
-    }
-
-    this.moveDownIterations++;
-
-    if (this.direction === Direction.DOWN) {
-      this.moveDownIterations = this.moveDownIterationsLength;
-    }
-
-    if (this.shouldMoveDown()) {
-      this.moveTetronimoY(1);
-      this.moveDownIterations = 0;
-    }
-
-    this.direction = Direction.IDLE;
-  }
-
-  private shouldMoveDown (): boolean {
-    return this.moveDownIterations >= this.moveDownIterationsLength;
-  }
-  private moveTetronimoX (amount: number): void {
-    for (let i = 0; i < this.currentTetronimo.length; i++) {
-      let tetronimoBlock = this.currentTetronimo[i];
-      tetronimoBlock.x += amount;
-    }
-  }
-  private moveTetronimoY (amount: number): void {
-    for (let i = 0; i < this.currentTetronimo.length; i++) {
-      let tetronimoBlock = this.currentTetronimo[i];
-      tetronimoBlock.y += amount;
-    }
-  }
-
-  private rotateTetronimo () {
-    if (this.currentTetronimoType === Tetronimo.SQUARE) {
-      return;
-    }
-
-    let rotatedCoords = new Array<Coordinates>();
-
-    for (let i = 0; i < this.currentTetronimo.length; i++) {
-      let current = this.currentRotationShape[i];
-      current.y *= -1;
-
-      rotatedCoords[i] = new Coordinates(0, 0);
-
-      rotatedCoords[i].x = Math.round(current.x * Math.cos(Math.PI / 2) - current.y * Math.sin(Math.PI / 2));
-      rotatedCoords[i].y = Math.round(current.x * Math.sin(Math.PI / 2) + current.y * Math.cos(Math.PI / 2));
-
-      rotatedCoords[i].y *= -1;
-
-      this.currentTetronimo[i].x = (rotatedCoords[i].x + this.currentTetronimo[0].x);
-      this.currentTetronimo[i].y = (rotatedCoords[i].y + this.currentTetronimo[0].y);
-    }
-
-    this.currentRotationShape = rotatedCoords;
-  }
-
-  private getTetronimo (type: Tetronimo): Array<Coordinates> {
-    switch (type) {
-      case Tetronimo.T:
-        return new Array(new Coordinates(0, 0), new Coordinates(-1, 0), new Coordinates(0, -1), new Coordinates(1, 0));
-      case Tetronimo.I:
-        return new Array(new Coordinates(0, 0), new Coordinates(-2, 0), new Coordinates(-1, 0), new Coordinates(1, 0));
-      case Tetronimo.SQUARE:
-        return new Array(new Coordinates(0, 0), new Coordinates(1, 0), new Coordinates(0, 1), new Coordinates(1, 1));
-      case Tetronimo.J:
-        return new Array(new Coordinates(0, 0), new Coordinates(-1, 0), new Coordinates(1, 0), new Coordinates(1, 1));
-      case Tetronimo.L:
-        return new Array(new Coordinates(0, 0), new Coordinates(-1, 0), new Coordinates(1, 0), new Coordinates(1, -1));
-      case Tetronimo.S:
-        return new Array(new Coordinates(0, 0), new Coordinates(1, 0), new Coordinates(0, 1), new Coordinates(-1, 1));
-      case Tetronimo.Z:
-        return new Array(new Coordinates(0, 0), new Coordinates(-1, 0), new Coordinates(0, 1), new Coordinates(1, 1));
-      default:
-        console.warn('tetronimo of type: ' + type + ' not found');
-        break;
-    }
-  }
-
-  private setNewCurrentTetronimo (type: Tetronimo) {
-    this.currentTetronimoType = type;
-    this.currentTetronimo = this.getTetronimo(this.currentTetronimoType);
-    this.currentRotationShape = this.getTetronimo(this.currentTetronimoType);
-    this.moveTetronimoX(5);
-  }
-
-  private horizontalCollision () {
-    for (let i = 0; i < this.currentTetronimo.length; i++) {
-      const currentBlock = this.currentTetronimo[i];
-      if (currentBlock.x >= this.gridWidth) {
-        this.moveTetronimoX(-1);
-      }
-      if (currentBlock.x < 0) {
-        this.moveTetronimoX(1);
+  private generateGrid (): void {
+    this.grid = [];
+    for (let x = 0; x < this.gridWidth; x++) {
+      this.grid[x] = new Array<Block>();
+      for (let y = 0; y < this.gridHeight; y++) {
+        this.grid[x][y] = new Block(x, y);
       }
     }
   }
 
-  private placementCollision () {
-    let placementHappened = false;
-    for (let i = 0; i < this.currentTetronimo.length; i++) {
-      const currentBlock = this.currentTetronimo[i];
-      if (currentBlock.y === this.gridHeight) {
-        placementHappened = true;
-        if (currentBlock.y <= this.gridHeight) {
-          this.moveTetronimoY(-1);
+  private start(): void {
+    this.generateGrid();
+    this.newPiece();
+
+    this.dropdownInterval = setInterval(this.dropDown.bind(this), 500);
+    this.drawInterval = setInterval(this.draw.bind(this), 100);
+  }
+
+  public newPiece (): void {
+    this.pieceOrigin = new Block(5, 0);
+    this.rotation = 0;
+    this.currentPiece = Math.floor(Math.random() * this.Tetrominos.length);
+  }
+
+  private collidesAt(x: number, y: number, rotation: number): boolean {
+    for (let i = 0; i < this.Tetrominos[this.currentPiece][rotation].length; i++) {
+      let currentBlock = this.Tetrominos[this.currentPiece][rotation][i];
+      if (this.grid[currentBlock.x + x][currentBlock.y + y]) {
+        if (this.grid[currentBlock.x + x][currentBlock.y + y].occupied) {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public rotate(i: number): void {
+    let newRotation = (this.rotation + i) % 4;
+    if (newRotation < 0) {
+      newRotation = 3;
+    }
+    if (!this.collidesAt(this.pieceOrigin.x, this.pieceOrigin.y, newRotation)) {
+      this.rotation = newRotation;
+    }
+  }
+
+  public moveTetrominoX (i: number): void {
+    if (!this.collidesAt(this.pieceOrigin.x + i, this.pieceOrigin.y, this.rotation)) {
+      this.pieceOrigin.x += i;
+    }
+  }
+
+  public dropDown(): void {
+    if (!this.collidesAt(this.pieceOrigin.x, this.pieceOrigin.y + 1, this.rotation)) {
+      this.pieceOrigin.y += 1;
+    } else {
+      this.fixToGrid();
+    }
+  }
+
+  public fixToGrid(): void {
+    for (let i = 0; i < this.Tetrominos[this.currentPiece][this.rotation].length; i++) {
+      let currentBlock = this.Tetrominos[this.currentPiece][this.rotation][i];
+      this.grid[this.pieceOrigin.x + currentBlock.x][this.pieceOrigin.y + currentBlock.y].occupied = true;
+    }
+    this.clearRows();
+    this.newPiece();
+  }
+
+  public deleteRow(row: number): void {
+    for (let y = row-1; y > 0; y--) {
+      for (let x = 0; x < this.gridWidth; x++) {
+        this.grid[x][y+1].occupied = this.grid[x][y].occupied;
+      }
+    }
+  }
+
+  // Clear completed rows from the field and award score according to
+  // the number of simultaneously cleared rows.
+  public clearRows (): void {
+    let fullRow: boolean;
+    let numClears: number = 0;
+
+    for (let i = this.gridHeight - 1; i > 0; i--) {
+      fullRow = true;
+      for (let j = 0; j < this.gridWidth; j++) {
+        if (!this.grid[j][i].occupied) {
+          fullRow = false;
+          break;
         }
       }
-      if (!placementHappened) {
-        for (let i = 0; i < this.placedTetronimos.length; i++) {
-          const placed = this.placedTetronimos[i];
-          if (currentBlock.y === placed.y && currentBlock.x === placed.x) {
-            placementHappened = true;
-            if (currentBlock.y <= placed.y) {
-              this.moveTetronimoY(-1);
-            }
-          }
-        }
+      if (fullRow) {
+        this.deleteRow(i);
+        i += 1;
+        numClears += 1;
       }
     }
 
-    if (placementHappened) {
-      this.placedTetronimos = this.placedTetronimos.concat(this.currentTetronimo);
-      this.setNewCurrentTetronimo(Tetronimo.I);
+    switch (numClears) {
+      case 1:
+        this.score += 100;
+        break;
+      case 2:
+        this.score += 300;
+        break;
+      case 3:
+        this.score += 500;
+        break;
+      case 4:
+        this.score += 800;
+        break;
     }
   }
 
-  private draw () {
+  private draw (): void {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.fillStyle = '#20C20E';
 
-    for (let i = 0; i < this.currentTetronimo.length; i++) {
-      let t = this.currentTetronimo[i];
-      this.ctx.fillRect((t.x * this.tileDiameter) + 1, (t.y * this.tileDiameter) + 1, this.tileDiameter - 1, this.tileDiameter - 1);
+    for (let i = 0; i < this.Tetrominos[this.currentPiece][this.rotation].length; i++) {
+      let currentBlock = this.Tetrominos[this.currentPiece][this.rotation][i];
+      this.ctx.fillRect(
+        ((currentBlock.x + this.pieceOrigin.x) * this.tileDiameter) + 1,
+        ((currentBlock.y + this.pieceOrigin.y) * this.tileDiameter) + 1,
+        this.tileDiameter - 1,
+        this.tileDiameter - 1
+      );
     }
-    for (let j = 0; j < this.placedTetronimos.length; j++) {
-      let p = this.placedTetronimos[j];
 
-      this.ctx.fillRect((p.x * this.tileDiameter) + 1, (p.y * this.tileDiameter) + 1, this.tileDiameter - 1, this.tileDiameter - 1);
+    for (let x = 0; x < this.gridWidth; x++) {
+      for (let y = 0; y < this.gridHeight; y++) {
+        const currentBlock = this.grid[x][y];
+        if (currentBlock.occupied) {
+          this.ctx.fillRect((currentBlock.x * this.tileDiameter) + 1,
+            (currentBlock.y * this.tileDiameter) + 1,
+            this.tileDiameter - 1,
+            this.tileDiameter - 1
+          );
+        }
+      }
+    }
+  }
+
+  private handleUserInput(e: KeyboardEvent): void {
+    let key = e.keyCode;
+    switch (key) {
+      case 37: // LEFT KEY
+        this.moveTetrominoX(-1);
+        break;
+      case 39: // RIGHT KEY
+        this.moveTetrominoX(+1)
+        break;
+      case 40: // DOWN KEY
+        this.dropDown();
+        break;
+      case 32: // SPACEBAR KEY
+        this.rotate(+1);
+        break;
+      default:
+        break;
     }
   }
 }

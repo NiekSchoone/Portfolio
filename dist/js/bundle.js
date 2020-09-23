@@ -698,208 +698,208 @@ exports.default = BotConsole;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Coordinates = /** @class */ (function () {
-    function Coordinates(_x, _y) {
+var Block = /** @class */ (function () {
+    function Block(_x, _y) {
         this.x = _x;
         this.y = _y;
     }
-    return Coordinates;
+    return Block;
 }());
-var Direction;
-(function (Direction) {
-    Direction[Direction["IDLE"] = 0] = "IDLE";
-    Direction[Direction["DOWN"] = 1] = "DOWN";
-    Direction[Direction["LEFT"] = 2] = "LEFT";
-    Direction[Direction["RIGHT"] = 3] = "RIGHT";
-})(Direction || (Direction = {}));
-var Tetronimo;
-(function (Tetronimo) {
-    Tetronimo[Tetronimo["T"] = 0] = "T";
-    Tetronimo[Tetronimo["I"] = 1] = "I";
-    Tetronimo[Tetronimo["SQUARE"] = 2] = "SQUARE";
-    Tetronimo[Tetronimo["J"] = 3] = "J";
-    Tetronimo[Tetronimo["L"] = 4] = "L";
-    Tetronimo[Tetronimo["S"] = 5] = "S";
-    Tetronimo[Tetronimo["Z"] = 6] = "Z";
-})(Tetronimo || (Tetronimo = {}));
 var Tetris = /** @class */ (function () {
     function Tetris() {
+        this.Tetrominos = [
+            [
+                [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(3, 1)],
+                [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(1, 3)],
+                [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(3, 1)],
+                [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(1, 3)]
+            ],
+            [
+                [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(2, 0)],
+                [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(2, 2)],
+                [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(0, 2)],
+                [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(0, 0)]
+            ],
+            [
+                [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(2, 2)],
+                [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(0, 2)],
+                [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(0, 0)],
+                [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(2, 0)]
+            ],
+            [
+                [new Block(0, 0), new Block(0, 1), new Block(1, 0), new Block(1, 1)],
+                [new Block(0, 0), new Block(0, 1), new Block(1, 0), new Block(1, 1)],
+                [new Block(0, 0), new Block(0, 1), new Block(1, 0), new Block(1, 1)],
+                [new Block(0, 0), new Block(0, 1), new Block(1, 0), new Block(1, 1)]
+            ],
+            [
+                [new Block(1, 0), new Block(2, 0), new Block(0, 1), new Block(1, 1)],
+                [new Block(0, 0), new Block(0, 1), new Block(1, 1), new Block(1, 2)],
+                [new Block(1, 0), new Block(2, 0), new Block(0, 1), new Block(1, 1)],
+                [new Block(0, 0), new Block(0, 1), new Block(1, 1), new Block(1, 2)]
+            ],
+            [
+                [new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(2, 1)],
+                [new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(1, 2)],
+                [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(1, 2)],
+                [new Block(1, 0), new Block(1, 1), new Block(2, 1), new Block(1, 2)]
+            ],
+            [
+                [new Block(0, 0), new Block(1, 0), new Block(1, 1), new Block(2, 1)],
+                [new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(0, 2)],
+                [new Block(0, 0), new Block(1, 0), new Block(1, 1), new Block(2, 1)],
+                [new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(0, 2)]
+            ]
+        ];
         this.container = document.getElementById('game-container');
         this.canvas = document.getElementById('game-stage');
         this.ctx = this.canvas.getContext('2d');
         this.gridHeight = 20;
         this.gridWidth = 12;
         this.tileDiameter = 20;
-        this.placedTetronimos = new Array();
         this.canvas.height = this.gridHeight * this.tileDiameter;
         this.canvas.width = this.gridWidth * this.tileDiameter;
         this.canvas.addEventListener('keydown', this.handleUserInput.bind(this));
         this.start();
     }
+    Tetris.prototype.generateGrid = function () {
+        this.grid = [];
+        for (var x = 0; x < this.gridWidth; x++) {
+            this.grid[x] = new Array();
+            for (var y = 0; y < this.gridHeight; y++) {
+                this.grid[x][y] = new Block(x, y);
+            }
+        }
+    };
     Tetris.prototype.start = function () {
-        this.score = 0;
-        this.moveDownIterationsLength = 8;
-        this.moveDownIterations = 0;
-        this.currentTetronimoType = Tetronimo.I;
-        this.currentTetronimo = this.getTetronimo(this.currentTetronimoType);
-        this.currentRotationShape = this.getTetronimo(this.currentTetronimoType);
-        this.moveTetronimoX(5);
-        this.canvas.focus();
-        this.interval = setInterval(this.update.bind(this), 100);
+        this.generateGrid();
+        this.newPiece();
+        this.dropdownInterval = setInterval(this.dropDown.bind(this), 500);
+        this.drawInterval = setInterval(this.draw.bind(this), 100);
     };
-    Tetris.prototype.end = function () {
-        clearInterval(this.interval);
+    Tetris.prototype.newPiece = function () {
+        this.pieceOrigin = new Block(5, 0);
+        this.rotation = 0;
+        this.currentPiece = Math.floor(Math.random() * this.Tetrominos.length);
     };
-    Tetris.prototype.update = function () {
-        this.moveTetronimo();
-        this.placementCollision();
-        this.horizontalCollision();
-        this.draw();
-    };
-    Tetris.prototype.handleUserInput = function (e) {
-        var key = e.keyCode;
-        switch (key) {
-            case 37: // LEFT KEY
-                this.direction = Direction.LEFT;
-                break;
-            case 39: // RIGHT KEY
-                this.direction = Direction.RIGHT;
-                break;
-            case 40: // DOWN KEY
-                this.direction = Direction.DOWN;
-                break;
-            case 32: // SPACEBAR KEY
-                this.rotateTetronimo();
-                break;
-            default:
-                this.direction = Direction.IDLE;
-                break;
-        }
-    };
-    Tetris.prototype.moveTetronimo = function () {
-        if (this.direction === Direction.RIGHT) {
-            this.moveTetronimoX(1);
-        }
-        else if (this.direction === Direction.LEFT) {
-            this.moveTetronimoX(-1);
-        }
-        this.moveDownIterations++;
-        if (this.direction === Direction.DOWN) {
-            this.moveDownIterations = this.moveDownIterationsLength;
-        }
-        if (this.shouldMoveDown()) {
-            this.moveTetronimoY(1);
-            this.moveDownIterations = 0;
-        }
-        this.direction = Direction.IDLE;
-    };
-    Tetris.prototype.shouldMoveDown = function () {
-        return this.moveDownIterations >= this.moveDownIterationsLength;
-    };
-    Tetris.prototype.moveTetronimoX = function (amount) {
-        for (var i = 0; i < this.currentTetronimo.length; i++) {
-            var tetronimoBlock = this.currentTetronimo[i];
-            tetronimoBlock.x += amount;
-        }
-    };
-    Tetris.prototype.moveTetronimoY = function (amount) {
-        for (var i = 0; i < this.currentTetronimo.length; i++) {
-            var tetronimoBlock = this.currentTetronimo[i];
-            tetronimoBlock.y += amount;
-        }
-    };
-    Tetris.prototype.rotateTetronimo = function () {
-        if (this.currentTetronimoType === Tetronimo.SQUARE) {
-            return;
-        }
-        var rotatedCoords = new Array();
-        for (var i = 0; i < this.currentTetronimo.length; i++) {
-            var current = this.currentRotationShape[i];
-            current.y *= -1;
-            rotatedCoords[i] = new Coordinates(0, 0);
-            rotatedCoords[i].x = Math.round(current.x * Math.cos(Math.PI / 2) - current.y * Math.sin(Math.PI / 2));
-            rotatedCoords[i].y = Math.round(current.x * Math.sin(Math.PI / 2) + current.y * Math.cos(Math.PI / 2));
-            rotatedCoords[i].y *= -1;
-            this.currentTetronimo[i].x = (rotatedCoords[i].x + this.currentTetronimo[0].x);
-            this.currentTetronimo[i].y = (rotatedCoords[i].y + this.currentTetronimo[0].y);
-        }
-        this.currentRotationShape = rotatedCoords;
-    };
-    Tetris.prototype.getTetronimo = function (type) {
-        switch (type) {
-            case Tetronimo.T:
-                return new Array(new Coordinates(0, 0), new Coordinates(-1, 0), new Coordinates(0, -1), new Coordinates(1, 0));
-            case Tetronimo.I:
-                return new Array(new Coordinates(0, 0), new Coordinates(-2, 0), new Coordinates(-1, 0), new Coordinates(1, 0));
-            case Tetronimo.SQUARE:
-                return new Array(new Coordinates(0, 0), new Coordinates(1, 0), new Coordinates(0, 1), new Coordinates(1, 1));
-            case Tetronimo.J:
-                return new Array(new Coordinates(0, 0), new Coordinates(-1, 0), new Coordinates(1, 0), new Coordinates(1, 1));
-            case Tetronimo.L:
-                return new Array(new Coordinates(0, 0), new Coordinates(-1, 0), new Coordinates(1, 0), new Coordinates(1, -1));
-            case Tetronimo.S:
-                return new Array(new Coordinates(0, 0), new Coordinates(1, 0), new Coordinates(0, 1), new Coordinates(-1, 1));
-            case Tetronimo.Z:
-                return new Array(new Coordinates(0, 0), new Coordinates(-1, 0), new Coordinates(0, 1), new Coordinates(1, 1));
-            default:
-                console.warn('tetronimo of type: ' + type + ' not found');
-                break;
-        }
-    };
-    Tetris.prototype.setNewCurrentTetronimo = function (type) {
-        this.currentTetronimoType = type;
-        this.currentTetronimo = this.getTetronimo(this.currentTetronimoType);
-        this.currentRotationShape = this.getTetronimo(this.currentTetronimoType);
-        this.moveTetronimoX(5);
-    };
-    Tetris.prototype.horizontalCollision = function () {
-        for (var i = 0; i < this.currentTetronimo.length; i++) {
-            var currentBlock = this.currentTetronimo[i];
-            if (currentBlock.x >= this.gridWidth) {
-                this.moveTetronimoX(-1);
-            }
-            if (currentBlock.x < 0) {
-                this.moveTetronimoX(1);
-            }
-        }
-    };
-    Tetris.prototype.placementCollision = function () {
-        var placementHappened = false;
-        for (var i = 0; i < this.currentTetronimo.length; i++) {
-            var currentBlock = this.currentTetronimo[i];
-            if (currentBlock.y === this.gridHeight) {
-                placementHappened = true;
-                if (currentBlock.y <= this.gridHeight) {
-                    this.moveTetronimoY(-1);
+    Tetris.prototype.collidesAt = function (x, y, rotation) {
+        for (var i = 0; i < this.Tetrominos[this.currentPiece][rotation].length; i++) {
+            var currentBlock = this.Tetrominos[this.currentPiece][rotation][i];
+            if (this.grid[currentBlock.x + x][currentBlock.y + y]) {
+                if (this.grid[currentBlock.x + x][currentBlock.y + y].occupied) {
+                    return true;
                 }
             }
-            if (!placementHappened) {
-                for (var i_1 = 0; i_1 < this.placedTetronimos.length; i_1++) {
-                    var placed = this.placedTetronimos[i_1];
-                    if (currentBlock.y === placed.y && currentBlock.x === placed.x) {
-                        placementHappened = true;
-                        if (currentBlock.y <= placed.y) {
-                            this.moveTetronimoY(-1);
-                        }
-                    }
-                }
+            else {
+                return true;
             }
         }
-        if (placementHappened) {
-            this.placedTetronimos = this.placedTetronimos.concat(this.currentTetronimo);
-            this.setNewCurrentTetronimo(Tetronimo.I);
+        return false;
+    };
+    Tetris.prototype.rotate = function (i) {
+        var newRotation = (this.rotation + i) % 4;
+        if (newRotation < 0) {
+            newRotation = 3;
+        }
+        if (!this.collidesAt(this.pieceOrigin.x, this.pieceOrigin.y, newRotation)) {
+            this.rotation = newRotation;
+        }
+    };
+    Tetris.prototype.moveTetrominoX = function (i) {
+        if (!this.collidesAt(this.pieceOrigin.x + i, this.pieceOrigin.y, this.rotation)) {
+            this.pieceOrigin.x += i;
+        }
+    };
+    Tetris.prototype.dropDown = function () {
+        if (!this.collidesAt(this.pieceOrigin.x, this.pieceOrigin.y + 1, this.rotation)) {
+            this.pieceOrigin.y += 1;
+        }
+        else {
+            this.fixToGrid();
+        }
+    };
+    Tetris.prototype.fixToGrid = function () {
+        for (var i = 0; i < this.Tetrominos[this.currentPiece][this.rotation].length; i++) {
+            var currentBlock = this.Tetrominos[this.currentPiece][this.rotation][i];
+            this.grid[this.pieceOrigin.x + currentBlock.x][this.pieceOrigin.y + currentBlock.y].occupied = true;
+        }
+        this.clearRows();
+        this.newPiece();
+    };
+    Tetris.prototype.deleteRow = function (row) {
+        for (var y = row - 1; y > 0; y--) {
+            for (var x = 0; x < this.gridWidth; x++) {
+                this.grid[x][y + 1].occupied = this.grid[x][y].occupied;
+            }
+        }
+    };
+    // Clear completed rows from the field and award score according to
+    // the number of simultaneously cleared rows.
+    Tetris.prototype.clearRows = function () {
+        var fullRow;
+        var numClears = 0;
+        for (var i = this.gridHeight - 1; i > 0; i--) {
+            fullRow = true;
+            for (var j = 0; j < this.gridWidth; j++) {
+                if (!this.grid[j][i].occupied) {
+                    fullRow = false;
+                    break;
+                }
+            }
+            if (fullRow) {
+                this.deleteRow(i);
+                i += 1;
+                numClears += 1;
+            }
+        }
+        switch (numClears) {
+            case 1:
+                this.score += 100;
+                break;
+            case 2:
+                this.score += 300;
+                break;
+            case 3:
+                this.score += 500;
+                break;
+            case 4:
+                this.score += 800;
+                break;
         }
     };
     Tetris.prototype.draw = function () {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.fillStyle = '#20C20E';
-        for (var i = 0; i < this.currentTetronimo.length; i++) {
-            var t = this.currentTetronimo[i];
-            this.ctx.fillRect((t.x * this.tileDiameter) + 1, (t.y * this.tileDiameter) + 1, this.tileDiameter - 1, this.tileDiameter - 1);
+        for (var i = 0; i < this.Tetrominos[this.currentPiece][this.rotation].length; i++) {
+            var currentBlock = this.Tetrominos[this.currentPiece][this.rotation][i];
+            this.ctx.fillRect(((currentBlock.x + this.pieceOrigin.x) * this.tileDiameter) + 1, ((currentBlock.y + this.pieceOrigin.y) * this.tileDiameter) + 1, this.tileDiameter - 1, this.tileDiameter - 1);
         }
-        for (var j = 0; j < this.placedTetronimos.length; j++) {
-            var p = this.placedTetronimos[j];
-            this.ctx.fillRect((p.x * this.tileDiameter) + 1, (p.y * this.tileDiameter) + 1, this.tileDiameter - 1, this.tileDiameter - 1);
+        for (var x = 0; x < this.gridWidth; x++) {
+            for (var y = 0; y < this.gridHeight; y++) {
+                var currentBlock = this.grid[x][y];
+                if (currentBlock.occupied) {
+                    this.ctx.fillRect((currentBlock.x * this.tileDiameter) + 1, (currentBlock.y * this.tileDiameter) + 1, this.tileDiameter - 1, this.tileDiameter - 1);
+                }
+            }
+        }
+    };
+    Tetris.prototype.handleUserInput = function (e) {
+        var key = e.keyCode;
+        switch (key) {
+            case 37: // LEFT KEY
+                this.moveTetrominoX(-1);
+                break;
+            case 39: // RIGHT KEY
+                this.moveTetrominoX(+1);
+                break;
+            case 40: // DOWN KEY
+                this.dropDown();
+                break;
+            case 32: // SPACEBAR KEY
+                this.rotate(+1);
+                break;
+            default:
+                break;
         }
     };
     return Tetris;
