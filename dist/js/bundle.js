@@ -295,35 +295,38 @@ exports.default = {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+console.log("snake");
 var Snake = /** @class */ (function () {
     function Snake() {
-        this.container = document.getElementById('game-container');
-        this.canvas = document.getElementById('game-stage');
-        this.ctx = this.canvas.getContext('2d');
-        this.button = document.getElementById('game-btn');
-        this.message = document.getElementById('game-msg');
-        this.scoreCounter = document.getElementById('score-counter');
+        this.container = document.getElementById("game-container");
+        this.canvas = document.getElementById("game-stage");
+        this.ctx = this.canvas.getContext("2d");
+        this.button = document.getElementById("game-btn");
+        this.message = document.getElementById("game-msg");
+        this.scoreCounter = document.getElementById("score-counter");
         this.dx = 0;
         this.dy = 0;
         this.tileDiameter = 16;
         this.score = 0;
-        this.canvas.addEventListener('keydown', this.changeDirection.bind(this));
-        this.button.addEventListener('click', this.start.bind(this));
+        this.canvas.width = this.tileDiameter * 20;
+        this.canvas.height = this.tileDiameter * 20;
+        this.canvas.addEventListener("keydown", this.changeDirection.bind(this));
+        this.button.addEventListener("click", this.start.bind(this));
     }
     Snake.prototype.start = function () {
-        this.button.style.display = 'none';
-        this.message.style.display = 'none';
+        this.button.style.display = "none";
+        this.message.style.display = "none";
         this.score = 0;
-        this.scoreCounter.innerHTML = 'Score: ' + this.score;
+        this.scoreCounter.innerHTML = "Score: " + this.score;
         this.snake = [
             { x: 10, y: 5 },
             { x: 10, y: 4 },
             { x: 10, y: 3 },
-            { x: 10, y: 2 }
+            { x: 10, y: 2 },
         ];
         this.food = {
             x: Math.floor(Math.random() * 19),
-            y: Math.floor(Math.random() * 19)
+            y: Math.floor(Math.random() * 19),
         };
         this.direction = Direction.DOWN;
         this.canvas.focus();
@@ -335,10 +338,10 @@ var Snake = /** @class */ (function () {
         this.dy = 0;
         this.snake = [];
         this.food = { x: -1, y: -1 };
-        this.button.value = 'RESTART';
-        this.button.style.display = 'block';
-        this.message.style.display = 'block';
-        this.message.innerHTML = 'Game over </br> Final score: ' + this.score;
+        this.button.value = "RESTART";
+        this.button.style.display = "block";
+        this.message.style.display = "block";
+        this.message.innerHTML = "Game over </br> Final score: " + this.score;
     };
     Snake.prototype.update = function () {
         this.directionChanged = false;
@@ -399,11 +402,15 @@ var Snake = /** @class */ (function () {
     Snake.prototype.collision = function () {
         var result = false;
         for (var i = 1; i < this.snake.length; i++) {
-            if (this.snake[i].x === this.snake[0].x && this.snake[i].y === this.snake[0].y) {
+            if (this.snake[i].x === this.snake[0].x &&
+                this.snake[i].y === this.snake[0].y) {
                 return true;
             }
         }
-        if (this.snake[0].x >= 20 || this.snake[0].x < 0 || this.snake[0].y >= 20 || this.snake[0].y < 0) {
+        if (this.snake[0].x >= 20 ||
+            this.snake[0].x < 0 ||
+            this.snake[0].y >= 20 ||
+            this.snake[0].y < 0) {
             result = true;
         }
         return result;
@@ -412,7 +419,7 @@ var Snake = /** @class */ (function () {
         this.food.x = Math.floor(Math.random() * 19);
         this.food.y = Math.floor(Math.random() * 19);
         this.score += 10;
-        this.scoreCounter.innerHTML = 'Score: ' + this.score;
+        this.scoreCounter.innerHTML = "Score: " + this.score;
     };
     Snake.prototype.draw = function () {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -435,6 +442,7 @@ var Direction;
     Direction[Direction["LEFT"] = 2] = "LEFT";
     Direction[Direction["RIGHT"] = 3] = "RIGHT";
 })(Direction || (Direction = {}));
+var snake = new Snake();
 
 
 /***/ }),
@@ -443,7 +451,17 @@ var Direction;
 
 "use strict";
 
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.EventBus = void 0;
 var EventBus = /** @class */ (function () {
     function EventBus() {
         this.eventList = {};
@@ -471,11 +489,11 @@ var EventBus = /** @class */ (function () {
         }
     };
     EventBus.prototype.emit = function (_key) {
+        var _a;
         var _params = [];
         for (var _i = 1; _i < arguments.length; _i++) {
             _params[_i - 1] = arguments[_i];
         }
-        var _a;
         var handlers = this.eventList[_key];
         if (!handlers || handlers.length === 0) {
             return false;
@@ -483,7 +501,7 @@ var EventBus = /** @class */ (function () {
         else {
             var len = handlers.length;
             for (var i = 0; i < len; i++) {
-                (_a = handlers[i]).call.apply(_a, [this].concat(_params));
+                (_a = handlers[i]).call.apply(_a, __spreadArray([this], _params, false));
             }
         }
     };
@@ -508,7 +526,7 @@ var PathRequestManager = /** @class */ (function () {
         set: function (p) {
             this.pathfinder = p;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     PathRequestManager.prototype.requestPath = function (start, end, callback) {
@@ -532,7 +550,7 @@ var PathRequestManager = /** @class */ (function () {
         get: function () {
             return this._instance || (this._instance = new this());
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     return PathRequestManager;
@@ -568,6 +586,7 @@ __webpack_require__(8);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Bot = void 0;
 var Snake_1 = __webpack_require__(1);
 var events_1 = __webpack_require__(2);
 var console_1 = __webpack_require__(6);
@@ -709,57 +728,64 @@ var Tetris = /** @class */ (function () {
     function Tetris() {
         this.Tetrominos = [
             [
+                // I-Piece
                 [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(3, 1)],
                 [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(1, 3)],
                 [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(3, 1)],
-                [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(1, 3)]
+                [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(1, 3)],
             ],
             [
+                // J-Piece
                 [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(2, 0)],
                 [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(2, 2)],
                 [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(0, 2)],
-                [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(0, 0)]
+                [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(0, 0)],
             ],
             [
+                // L-Piece
                 [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(2, 2)],
                 [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(0, 2)],
                 [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(0, 0)],
-                [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(2, 0)]
+                [new Block(1, 0), new Block(1, 1), new Block(1, 2), new Block(2, 0)],
             ],
             [
+                // O-Piece
                 [new Block(0, 0), new Block(0, 1), new Block(1, 0), new Block(1, 1)],
                 [new Block(0, 0), new Block(0, 1), new Block(1, 0), new Block(1, 1)],
                 [new Block(0, 0), new Block(0, 1), new Block(1, 0), new Block(1, 1)],
-                [new Block(0, 0), new Block(0, 1), new Block(1, 0), new Block(1, 1)]
+                [new Block(0, 0), new Block(0, 1), new Block(1, 0), new Block(1, 1)],
             ],
             [
+                // S-Piece
                 [new Block(1, 0), new Block(2, 0), new Block(0, 1), new Block(1, 1)],
                 [new Block(0, 0), new Block(0, 1), new Block(1, 1), new Block(1, 2)],
                 [new Block(1, 0), new Block(2, 0), new Block(0, 1), new Block(1, 1)],
-                [new Block(0, 0), new Block(0, 1), new Block(1, 1), new Block(1, 2)]
+                [new Block(0, 0), new Block(0, 1), new Block(1, 1), new Block(1, 2)],
             ],
             [
+                // T-Piece
                 [new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(2, 1)],
                 [new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(1, 2)],
                 [new Block(0, 1), new Block(1, 1), new Block(2, 1), new Block(1, 2)],
-                [new Block(1, 0), new Block(1, 1), new Block(2, 1), new Block(1, 2)]
+                [new Block(1, 0), new Block(1, 1), new Block(2, 1), new Block(1, 2)],
             ],
             [
+                // Z-Piece
                 [new Block(0, 0), new Block(1, 0), new Block(1, 1), new Block(2, 1)],
                 [new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(0, 2)],
                 [new Block(0, 0), new Block(1, 0), new Block(1, 1), new Block(2, 1)],
-                [new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(0, 2)]
-            ]
+                [new Block(1, 0), new Block(0, 1), new Block(1, 1), new Block(0, 2)],
+            ],
         ];
-        this.container = document.getElementById('game-container');
-        this.canvas = document.getElementById('game-stage');
-        this.ctx = this.canvas.getContext('2d');
+        this.container = document.getElementById("game-container");
+        this.canvas = document.getElementById("game-stage");
+        this.ctx = this.canvas.getContext("2d");
         this.gridHeight = 20;
         this.gridWidth = 12;
         this.tileDiameter = 20;
         this.canvas.height = this.gridHeight * this.tileDiameter;
         this.canvas.width = this.gridWidth * this.tileDiameter;
-        this.canvas.addEventListener('keydown', this.handleUserInput.bind(this));
+        this.canvas.addEventListener("keydown", this.handleUserInput.bind(this));
         this.start();
     }
     Tetris.prototype.generateGrid = function () {
@@ -869,16 +895,16 @@ var Tetris = /** @class */ (function () {
     };
     Tetris.prototype.draw = function () {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.fillStyle = '#20C20E';
+        this.ctx.fillStyle = "#20C20E";
         for (var i = 0; i < this.Tetrominos[this.currentPiece][this.rotation].length; i++) {
             var currentBlock = this.Tetrominos[this.currentPiece][this.rotation][i];
-            this.ctx.fillRect(((currentBlock.x + this.pieceOrigin.x) * this.tileDiameter) + 1, ((currentBlock.y + this.pieceOrigin.y) * this.tileDiameter) + 1, this.tileDiameter - 1, this.tileDiameter - 1);
+            this.ctx.fillRect((currentBlock.x + this.pieceOrigin.x) * this.tileDiameter + 1, (currentBlock.y + this.pieceOrigin.y) * this.tileDiameter + 1, this.tileDiameter - 1, this.tileDiameter - 1);
         }
         for (var x = 0; x < this.gridWidth; x++) {
             for (var y = 0; y < this.gridHeight; y++) {
                 var currentBlock = this.grid[x][y];
                 if (currentBlock.occupied) {
-                    this.ctx.fillRect((currentBlock.x * this.tileDiameter) + 1, (currentBlock.y * this.tileDiameter) + 1, this.tileDiameter - 1, this.tileDiameter - 1);
+                    this.ctx.fillRect(currentBlock.x * this.tileDiameter + 1, currentBlock.y * this.tileDiameter + 1, this.tileDiameter - 1, this.tileDiameter - 1);
                 }
             }
         }
@@ -914,6 +940,7 @@ exports.default = Tetris;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.BGCanvas = void 0;
 var flocking_1 = __webpack_require__(9);
 var pathfindingInstance_1 = __webpack_require__(11);
 //import { StateMachineInstance } from './StateMachine/statemachineInstance';
@@ -944,6 +971,7 @@ var pathfinding = new BGCanvas('pathfinding-stage', pathfindingInstance_1.Pathfi
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Flock = void 0;
 var boid_1 = __webpack_require__(10);
 var Flock = /** @class */ (function () {
     function Flock(canvas) {
@@ -1133,6 +1161,7 @@ exports.default = Boid;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.PathfindingInstance = void 0;
 var grid_1 = __webpack_require__(12);
 var pathfinder_1 = __webpack_require__(14);
 var vector2_1 = __webpack_require__(0);
@@ -1239,7 +1268,7 @@ var Tile = /** @class */ (function () {
     }
     Object.defineProperty(Tile.prototype, "GridPosition", {
         get: function () { return this.gridPosition; },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Tile.prototype, "Walkable", {
@@ -1249,21 +1278,21 @@ var Tile = /** @class */ (function () {
         set: function (value) {
             this.walkable = value;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Tile.prototype, "WorldPosition", {
         get: function () {
             return vector2_1.default.make(this.gridPosition.x * this.diameter, this.gridPosition.y * this.diameter);
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     Object.defineProperty(Tile.prototype, "fCost", {
         get: function () {
             return this.gCost + this.hCost;
         },
-        enumerable: true,
+        enumerable: false,
         configurable: true
     });
     return Tile;

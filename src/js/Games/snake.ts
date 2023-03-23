@@ -1,3 +1,5 @@
+console.log("snake");
+
 export default class Snake {
   private container: HTMLElement;
   private canvas: HTMLCanvasElement;
@@ -7,53 +9,58 @@ export default class Snake {
   private message: HTMLSpanElement;
   private scoreCounter: HTMLSpanElement;
 
-  private snake: { x: number, y: number }[];
-  private food: { x: number, y: number };
+  private snake: { x: number; y: number }[];
+  private food: { x: number; y: number };
   private direction: Direction;
 
   private dx: number;
   private dy: number;
   private score: number;
-  private interval: number;
+  private interval: NodeJS.Timer;
   private tileDiameter: number;
   private directionChanged: boolean;
 
-  constructor () {
-    this.container = document.getElementById('game-container');
-    this.canvas = document.getElementById('game-stage') as HTMLCanvasElement;
-    this.ctx = this.canvas.getContext('2d');
+  constructor() {
+    this.container = document.getElementById("game-container");
+    this.canvas = document.getElementById("game-stage") as HTMLCanvasElement;  
+    this.ctx = this.canvas.getContext("2d");
 
-    this.button = document.getElementById('game-btn') as HTMLInputElement;
-    this.message = document.getElementById('game-msg') as HTMLSpanElement;
-    this.scoreCounter = document.getElementById('score-counter') as HTMLSpanElement;
+    this.button = document.getElementById("game-btn") as HTMLInputElement;
+    this.message = document.getElementById("game-msg") as HTMLSpanElement;
+    this.scoreCounter = document.getElementById(
+      "score-counter"
+    ) as HTMLSpanElement;
 
     this.dx = 0;
     this.dy = 0;
     this.tileDiameter = 16;
     this.score = 0;
 
-    this.canvas.addEventListener('keydown', this.changeDirection.bind(this));
-    this.button.addEventListener('click', this.start.bind(this));
+    this.canvas.width = this.tileDiameter * 20;
+    this.canvas.height = this.tileDiameter * 20;
+
+    this.canvas.addEventListener("keydown", this.changeDirection.bind(this));
+    this.button.addEventListener("click", this.start.bind(this));
   }
 
-  private start () {
-    this.button.style.display = 'none';
-    this.message.style.display = 'none';
+  private start() {
+    this.button.style.display = "none";
+    this.message.style.display = "none";
 
     this.score = 0;
-    this.scoreCounter.innerHTML = 'Score: ' + this.score;
+    this.scoreCounter.innerHTML = "Score: " + this.score;
 
     this.snake = [
       { x: 10, y: 5 },
       { x: 10, y: 4 },
       { x: 10, y: 3 },
-      { x: 10, y: 2 }
+      { x: 10, y: 2 },
     ];
 
     this.food = {
       x: Math.floor(Math.random() * 19),
-      y: Math.floor(Math.random() * 19)
-    }
+      y: Math.floor(Math.random() * 19),
+    };
     this.direction = Direction.DOWN;
 
     this.canvas.focus();
@@ -66,16 +73,16 @@ export default class Snake {
     this.dy = 0;
     this.snake = [];
     this.food = { x: -1, y: -1 };
-    this.button.value = 'RESTART';
-    this.button.style.display = 'block';
-    this.message.style.display = 'block';
-    this.message.innerHTML = 'Game over </br> Final score: ' + this.score;
+    this.button.value = "RESTART";
+    this.button.style.display = "block";
+    this.message.style.display = "block";
+    this.message.innerHTML = "Game over </br> Final score: " + this.score;
   }
 
-  private update () {
+  private update() {
     this.directionChanged = false;
 
-    switch(this.direction) {
+    switch (this.direction) {
       case Direction.LEFT:
         this.dx = -1;
         this.dy = 0;
@@ -105,7 +112,7 @@ export default class Snake {
     this.draw();
   }
 
-  private changeDirection (e: KeyboardEvent) {
+  private changeDirection(e: KeyboardEvent) {
     if (!this.directionChanged) {
       this.directionChanged = true;
       let key = e.keyCode;
@@ -121,7 +128,7 @@ export default class Snake {
     }
   }
 
-  private move () {
+  private move() {
     let head = { x: this.snake[0].x + this.dx, y: this.snake[0].y + this.dy };
     this.snake.unshift(head);
     if (head.x === this.food.x && head.y == this.food.y) {
@@ -131,48 +138,71 @@ export default class Snake {
     }
   }
 
-  private collision () {
+  private collision() {
     let result = false;
 
     for (let i = 1; i < this.snake.length; i++) {
-      if(this.snake[i].x === this.snake[0].x && this.snake[i].y === this.snake[0].y) {
+      if (
+        this.snake[i].x === this.snake[0].x &&
+        this.snake[i].y === this.snake[0].y
+      ) {
         return true;
       }
     }
-    if (this.snake[0].x >= 20 || this.snake[0].x < 0 || this.snake[0].y >= 20 || this.snake[0].y < 0) {
+    if (
+      this.snake[0].x >= 20 ||
+      this.snake[0].x < 0 ||
+      this.snake[0].y >= 20 ||
+      this.snake[0].y < 0
+    ) {
       result = true;
     }
     return result;
   }
 
-  private eat () {
+  private eat() {
     this.food.x = Math.floor(Math.random() * 19);
     this.food.y = Math.floor(Math.random() * 19);
     this.score += 10;
-    this.scoreCounter.innerHTML = 'Score: ' + this.score;
+    this.scoreCounter.innerHTML = "Score: " + this.score;
   }
 
-  private draw () {
+  private draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     for (let i = 0; i < this.snake.length; i++) {
       this.ctx.fillStyle = "#20C20E";
-      this.ctx.fillRect(this.snake[i].x * this.tileDiameter, this.snake[i].y * this.tileDiameter, this.tileDiameter, this.tileDiameter);
-
+      this.ctx.fillRect(
+        this.snake[i].x * this.tileDiameter,
+        this.snake[i].y * this.tileDiameter,
+        this.tileDiameter,
+        this.tileDiameter
+      );
 
       this.ctx.strokeStyle = "black";
-      this.ctx.strokeRect(this.snake[i].x * this.tileDiameter, this.snake[i].y * this.tileDiameter, this.tileDiameter, this.tileDiameter);
+      this.ctx.strokeRect(
+        this.snake[i].x * this.tileDiameter,
+        this.snake[i].y * this.tileDiameter,
+        this.tileDiameter,
+        this.tileDiameter
+      );
     }
 
     this.ctx.fillStyle = "red";
-    this.ctx.fillRect(this.food.x * this.tileDiameter, this.food.y * this.tileDiameter, this.tileDiameter, this.tileDiameter);
+    this.ctx.fillRect(
+      this.food.x * this.tileDiameter,
+      this.food.y * this.tileDiameter,
+      this.tileDiameter,
+      this.tileDiameter
+    );
   }
-
 }
 
 enum Direction {
   UP,
   DOWN,
   LEFT,
-  RIGHT
+  RIGHT,
 }
+
+let snake = new Snake();
